@@ -1,0 +1,11 @@
+Estou criando um SaaS DeFi na Solana chamado "Stable Yield Vault". 
+Use o contexto abaixo para me ajudar a planejar a arquitetura.
+
+[COLAR O "CONTEXTO DO PROJETO" ACIMA]
+
+Primeiro, valide se você entende:
+1. Qual é a mecânica central de rebalance?
+2. Quais são os 4 módulos principais?
+3. Qual a stack técnica recomendada para cada?
+
+Depois, sugira a ordem ideal de implementação para um MVP testnet.

@@ -1,0 +1,17 @@
+Vamos começar pelo Módulo 1: On-Chain Core em Rust/Anchor.
+
+Requisitos:
+1. Criar PDAs: StrategyConfig, PositionState, RebalanceLog
+2. Instruções: initialize, deposit, rebalance, withdraw, update_params
+3. Integração CPI com Orca Whirlpools para open/close position [[34]]
+4. Validações: math safe, access control via session key, limites de slippage
+5. Emitir eventos para frontend/keeper monitorarem
+
+Entregáveis esperados:
+- Estrutura de pastas do programa Anchor
+- Código Rust dos structs PDA
+- Skeleton das instruções (comentadas, sem lógica completa ainda)
+- IDL esperado
+- Testes unitários básicos (1 por instrução)
+
+Gere o plano de implementação passo a passo.

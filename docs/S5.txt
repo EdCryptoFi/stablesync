@@ -1,0 +1,24 @@
+Módulo 3: Frontend Next.js + Analytics do Usuário
+
+Requisitos:
+1. Conexão wallet: Phantom/Solflare via @solana/wallet-adapter
+2. Wizard de setup (3 passos):
+   - Passo 1: Escolher par + estratégia (cards visuais)
+   - Passo 2: Configurar valor ($100-$1000 slider), timer (15min/30min/1H), ver gráfico com faixas overlay
+   - Passo 3: Checklist de riscos + confirmação + assinatura
+3. Dashboard da posição:
+   - Gráfico TradingView-style com faixas 80/10/10 overlay
+   - Métricas: PnL total, yield acumulado, custos SOL, IL realizado
+   - Histórico de rebalances (tabela + pins no gráfico)
+   - Projeção simples (7D forward)
+4. Integração com IDL do Módulo 1 + leitura de eventos
+
+Stack: Next.js 14, Tailwind, Recharts/TradingView Lightweight Charts, @solana/wallet-adapter
+
+Entregáveis:
+- Estrutura de pastas Next.js
+- Componentes principais (WalletConnect, StrategyWizard, PositionDashboard)
+- Hooks para leitura on-chain (useStrategy, useRebalanceHistory)
+- Exemplo de chamada de instrução "deposit" via IDL
+
+Gere o plano.

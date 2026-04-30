@@ -1,0 +1,22 @@
+Módulo 4: Analytics (Usuário + Admin) + Deploy Pipeline
+
+Requisitos Usuário:
+- Gráfico de evolução de PnL (yield vs custos vs IL)
+- Simulador "what-if" (ajustar timer → ver impacto no yield líquido)
+- Alertas configuráveis (email/push para rebalance, saída de range)
+
+Requisitos Admin:
+- Dashboard global: TVL, usuários ativos, saúde do keeper
+- Ranking de estratégias por APY realizado
+- Pipeline de deploy: testnet → staging (fork mainnet) → mainnet com gates de aprovação
+- Alertas críticos (Keeper down, oracle falha) com notificação Slack/SMS
+
+Stack: TimescaleDB para métricas time-series, Metabase embed para admin, Supabase para auth/db [[Integration Docs]]
+
+Entregáveis:
+- Schema TimescaleDB para métricas de usuário
+- API endpoints para alimentar dashboards
+- Componentes admin (StrategyManager, DeployPipeline, IncidentAlerts)
+- Configuração de integração Supabase + Metabase
+
+Gere o plano.

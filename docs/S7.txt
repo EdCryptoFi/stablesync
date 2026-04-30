@@ -1,0 +1,18 @@
+Módulo 5: Validação e Deploy para Solana Testnet
+
+Requisitos:
+1. Testes em fork de mainnet (dados reais, execução local)
+2. Script de deploy automático via GitHub Actions + Noah deploy [[3]]
+3. Checklist de segurança pré-mainnet:
+   - [ ] Audit report (mesmo que básico)
+   - [ ] Runbook de emergência (pause, rollback)
+   - [ ] Multisig config para ações críticas
+4. Monitoramento pós-deploy: logs do keeper, health check RPC, alertas de falha
+
+Entregáveis:
+- GitHub Actions workflow para test/deploy
+- Script de seed para popular testnet com dados mock
+- Checklist de go-live testnet em markdown
+- Configuração de variáveis de ambiente (.env.example)
+
+Gere o plano.

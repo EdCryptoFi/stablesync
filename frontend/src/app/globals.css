@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0f0d;
+  --foreground: #e2f0e8;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Wallet adapter override */
+.wallet-adapter-button {
+  background: transparent !important;
+  border: 1px solid #22c55e !important;
+  color: #22c55e !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.875rem !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem 1.25rem !important;
+  height: auto !important;
+}
+
+.wallet-adapter-button:hover {
+  background: rgba(34, 197, 94, 0.1) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #0f1712 !important;
+  border: 1px solid #1e2e24 !important;
+  border-radius: 1rem !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #e2f0e8 !important;
+}
+
+.wallet-adapter-modal-list li {
+  border-radius: 0.5rem !important;
+}

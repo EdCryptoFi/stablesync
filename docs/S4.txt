@@ -1,0 +1,20 @@
+Módulo 2: Automation Agent (Keeper)
+
+Requisitos:
+1. Polling de preço via Pyth Network (feed USDC/USDT testnet) [[19]]
+2. Leitura do estado on-chain (PDAs) via Helius RPC
+3. Motor de decisão: 
+   - IF timer expirado AND preço fora das asas → trigger rebalance
+   - ELSE → aguardar próximo ciclo
+4. Builder de transações: monta CPI calls, calcula compute budget, assina com session key
+5. Logging estruturado + alertas (Slack webhook)
+
+Stack sugerida: Rust ou Node.js + Helius SDK + Pyth SDK
+
+Entregáveis:
+- Estrutura do serviço (main loop, handlers)
+- Configuração de conexão RPC/Pyth
+- Lógica de decisão em pseudocódigo
+- Exemplo de tx builder para rebalance
+
+Gere o plano.

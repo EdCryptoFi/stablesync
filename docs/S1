@@ -1,0 +1,34 @@
+# CONTEXTO DO PROJETO - Stable Yield Vault Solana
+
+## Objetivo
+SaaS que cria posições de liquidez concentrada em stablecoins na Solana com rebalanceamento automático por timer.
+
+## Mecânica Central
+- Alocação: 80% Centro (±0.025%), 10% Asa Superior (0.03-0.10%), 10% Asa Inferior (-0.03 a -0.10%)
+- Rebalance: Agente off-chain verifica a cada X minutos (timer do usuário). Se preço sair das asas → fecha 3 posições → abre 3 novas no novo centro
+- Custos: Taxas de rede pagas em SOL da carteira do usuário
+
+## Stack Técnica
+- Smart Contract: Rust + Anchor framework [[11]]
+- DEX Target: Orca Whirlpools (CPI) [[34]]
+- Oracle: Pyth Network para preços stablecoins [[19]]
+- Frontend: Next.js + Solana Wallet Adapter
+- Backend/Agent: Rust/Node com Helius RPC
+- Database: Supabase para analytics/off-chain state [[Integration Docs]]
+
+## Módulos
+1. On-Chain: Programa Anchor com PDAs para StrategyConfig, PositionState
+2. Agent: Keeper off-chain que monitora timer + preço Pyth → dispara rebalance
+3. Frontend: Wizard de setup, dashboard com gráficos, simulador de yield
+4. Analytics: TimescaleDB para métricas de usuário + admin dashboard
+
+## Segurança
+- Session key delegation para rebalance automático sem custódia
+- Circuit-breakers: max slippage, max SOL fee, oracle staleness
+- Multisig para deploy mainnet e pause de emergência
+
+## MVP Testnet
+- Pares: USDC/USDT, USDC/USDS (apenas stables)
+- Estratégias: Scalper Stable (ranges apertados)
+- Timer mínimo: 15min
+- Deploy: Solana Devnet/Testnet via Noah [[3]]

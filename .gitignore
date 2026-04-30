@@ -1,0 +1,39 @@
+# Rust / Anchor
+program/target/
+program/.anchor/
+**/*.rs.bk
+
+# Wallets & keypairs — NEVER commit private keys
+program/target/wallet/
+program/target/deploy/*-keypair.json
+script/*-keypair.json
+
+# Large video files
+images/*.mov
+images/*.mp4
+
+# Claude local settings
+.claude/
+
+# Node
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
+
+# Env
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/

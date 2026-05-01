@@ -35,7 +35,10 @@ export function Step2Configure({ amount, interval, onAmountChange, onIntervalCha
           max={MAX}
           step={50}
           value={amount}
-          onChange={(e) => onAmountChange(Number(e.target.value))}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            onAmountChange(Number.isFinite(v) ? Math.min(MAX, Math.max(MIN, v)) : MIN);
+          }}
           className="w-full h-2 rounded-full appearance-none cursor-pointer"
           style={{
             background: `linear-gradient(to right, #22c55e ${((amount - MIN) / (MAX - MIN)) * 100}%, #1e2e24 0%)`,

@@ -1,6 +1,6 @@
 import { AnchorProvider, Program, Idl } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
-import { PROGRAM_ID } from './constants';
+import { PROGRAM_ID, DEPLOYER_PUBKEY } from './constants';
 import idlJson from './idl.json';
 
 const idl = idlJson as unknown as Idl;
@@ -21,6 +21,13 @@ export function getPositionPDA(
       tokenAMint.toBuffer(),
       tokenBMint.toBuffer(),
     ],
+    new PublicKey(PROGRAM_ID),
+  );
+}
+
+export function getConfigPDA(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('config'), new PublicKey(DEPLOYER_PUBKEY).toBuffer()],
     new PublicKey(PROGRAM_ID),
   );
 }

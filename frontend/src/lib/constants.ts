@@ -1,8 +1,10 @@
 export const PROGRAM_ID = '7D4zRu6F77ryuNbAWFh27YtWxApD8PszWFLhY1gqXMK6';
+export const DEPLOYER_PUBKEY = '7EBg9nwJspxwnr86WRhKzqXSLAybhrDUDxxPSCqctuhL';
 
 export const RPC_ENDPOINT =
   process.env.NEXT_PUBLIC_RPC_URL ?? 'https://api.devnet.solana.com';
 
+// Devnet test tokens (replace with mainnet addresses for production)
 export const PAIRS = [
   {
     id: 'USDC/USDT',
@@ -10,8 +12,8 @@ export const PAIRS = [
     tokenB: 'USDT',
     description: 'Most liquid stablecoin pair on Orca Devnet',
     avgApy: '8–12%',
-    mintA: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    mintB: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+    mintA: 'BZCSMV4ZaBMSUZnojhCnhYE5R919YN2b4U39JVEjnQzs',
+    mintB: '2KrpCa2VCa9M1LVJn9Re43fyjVPCBgtUu87Z4kGdebvr',
   },
   {
     id: 'USDC/USDS',
@@ -19,8 +21,8 @@ export const PAIRS = [
     tokenB: 'USDS',
     description: 'Emerging pair — lower liquidity, higher spread',
     avgApy: '10–16%',
-    mintA: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-    mintB: 'USDSwr9ApdHk5bvJKMjzff41FfuX8bSxdKcR81vTwcA',
+    mintA: 'BZCSMV4ZaBMSUZnojhCnhYE5R919YN2b4U39JVEjnQzs',
+    mintB: 'HKgm8LzDNAk3skpu5yQYUjEfdSrkNX4Vsh3xPEQmD6fT',
   },
 ];
 

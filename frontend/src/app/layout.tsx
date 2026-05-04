@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { WalletProvider } from '@/components/WalletProvider';
 import { StrategyProvider } from '@/contexts/StrategyContext';
+import { VaultProvider } from '@/contexts/VaultContext';
 
 export const metadata: Metadata = {
   title: 'StableSync — Automated Stablecoin Liquidity on Solana',
@@ -15,10 +16,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body>
         <WalletProvider>
-          <StrategyProvider>{children}</StrategyProvider>
+          <VaultProvider>
+            <StrategyProvider>{children}</StrategyProvider>
+          </VaultProvider>
         </WalletProvider>
       </body>
     </html>

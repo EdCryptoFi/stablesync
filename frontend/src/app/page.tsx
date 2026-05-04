@@ -1,155 +1,317 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Shield, Zap, BarChart3, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
+import { Shield, Zap, BarChart3, FileText } from 'lucide-react';
+import { OrcaLiveStats } from '@/components/OrcaLiveStats';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-surface-900 text-white">
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-surface-700 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
-            <RefreshCw size={14} className="text-white" />
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+
+      {/* Navbar — glassmorphism */}
+      <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 h-16 bg-[#0A0A0A]/80 backdrop-blur-md border-b border-[#ffffff0d]">
+        <div className="max-w-[1200px] mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <span className="text-xl font-black tracking-tighter text-[#10B981] font-manrope drop-shadow-[0_0_12px_rgba(16,185,129,0.5)]">StableSync</span>
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/app/position" className="text-neutral-400 font-medium hover:text-white transition-colors duration-200 font-manrope text-sm tracking-tight">Dashboard</Link>
+              <Link href="/app" className="text-neutral-400 font-medium hover:text-white transition-colors duration-200 font-manrope text-sm tracking-tight">Strategies</Link>
+              <Link href="/app/vault" className="text-neutral-400 font-medium hover:text-white transition-colors duration-200 font-manrope text-sm tracking-tight">Vault</Link>
+              <Link href="/roadmap" className="text-neutral-400 font-medium hover:text-white transition-colors duration-200 font-manrope text-sm tracking-tight">Roadmap</Link>
+              <Link href="/docs" className="text-neutral-400 font-medium hover:text-white transition-colors duration-200 font-manrope text-sm tracking-tight">Docs</Link>
+            </div>
           </div>
-          <span className="font-semibold text-white">StableSync</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a
-            href="https://x.com/stablesync_sol"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-gray-400 hover:text-white transition-colors"
-          >
-            @stablesync_sol
-          </a>
-          <Link
-            href="/app"
-            className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-          >
-            Launch App <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-4">
+            <a href="https://x.com/Stable_Sync" target="_blank" rel="noopener noreferrer"
+              className="text-neutral-400 hover:text-[#10B981] transition-colors text-sm font-manrope">Twitter</a>
+            <a href="https://github.com/EdCryptoFi/stablesync" target="_blank" rel="noopener noreferrer"
+              className="text-neutral-400 hover:text-[#10B981] transition-colors text-sm font-manrope">GitHub</a>
+            <Link href="/app"
+              className="bg-[#10B981] text-black font-bold px-5 py-2 rounded-lg text-sm hover:bg-[#0da06f] active:scale-95 transition-all shadow-[0_0_16px_rgba(16,185,129,0.3)]">
+              Launch App
+            </Link>
+          </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6">
-        {/* Hero */}
-        <section className="pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-surface-700 border border-surface-600 rounded-full px-4 py-1.5 text-sm text-brand-400 mb-8">
-            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
-            Live on Solana Devnet
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6 max-w-3xl mx-auto">
-            Earn yield on stablecoins.{' '}
-            <span className="text-brand-400">Automatically.</span>
-          </h1>
-          <p className="text-lg text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
-            StableSync manages your concentrated liquidity positions on Orca Whirlpools —
-            rebalancing on autopilot, without ever touching your funds.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link
-              href="/app"
-              className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-base"
-            >
-              Start Earning <ArrowRight size={16} />
-            </Link>
-            <a
-              href="https://github.com/stablesync"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-gray-400 hover:text-white transition-colors underline underline-offset-4"
-            >
-              View on GitHub
-            </a>
-          </div>
-        </section>
+      <main className="pt-16">
 
-        {/* Stats */}
-        <section className="grid grid-cols-3 gap-6 max-w-2xl mx-auto mb-24">
-          {[
-            { label: 'Avg APY (USDC/USDT)', value: '8–14%' },
-            { label: 'Min rebalance interval', value: '15 min' },
-            { label: 'Platform fee', value: '0.2% of yield' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-surface-800 border border-surface-600 rounded-xl p-5 text-center">
-              <div className="text-2xl font-bold text-brand-400 mb-1">{stat.value}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
+        {/* Hero Section */}
+        <section className="relative overflow-hidden">
+          {/* Ambient glow blobs */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[#10B981]/8 rounded-full blur-[120px]" />
+            <div className="absolute top-[40px] left-[10%] w-[400px] h-[400px] bg-[#4edea3]/5 rounded-full blur-[100px]" />
+            <div className="absolute top-[60px] right-[5%] w-[350px] h-[350px] bg-[#14B8A6]/5 rounded-full blur-[100px]" />
+          </div>
+
+          <div className="max-w-[1200px] mx-auto px-8 py-[100px] flex flex-col md:flex-row items-center gap-14 relative z-10">
+            <div className="md:w-1/2 space-y-8">
+              <div className="inline-flex items-center gap-2 bg-[#10B981]/10 border border-[#10B981]/25 rounded-full px-4 py-1.5 text-sm text-[#4edea3]">
+                <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="font-manrope font-semibold tracking-tight">Live on Solana Devnet</span>
+              </div>
+              <h1 className="font-manrope text-[56px] leading-[1.05] tracking-[-0.03em] font-extrabold text-white">
+                Earn yield on<br />stablecoins.{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4edea3] to-[#10B981]">Automatically.</span>
+              </h1>
+              <p className="text-[18px] leading-[1.7] text-[#A3A3A3] max-w-lg">
+                StableSync provides non-custodial automated rebalancing on Orca Whirlpools. Maximize your capital efficiency without the manual effort.
+              </p>
+              <div className="flex gap-4 flex-wrap">
+                <Link href="/app"
+                  className="bg-[#10B981] text-black font-bold px-8 py-4 rounded-xl hover:bg-[#0da06f] active:scale-95 transition-all shadow-[0_0_32px_rgba(16,185,129,0.35)] font-manrope">
+                  Launch App
+                </Link>
+                <a href="https://github.com/EdCryptoFi/stablesync" target="_blank" rel="noopener noreferrer"
+                  className="border border-[#3c4a42] text-[#A3A3A3] font-semibold px-8 py-4 rounded-xl hover:border-[#4edea3]/60 hover:text-white transition-all font-manrope">
+                  View on GitHub
+                </a>
+              </div>
             </div>
-          ))}
-        </section>
 
-        {/* Features */}
-        <section className="mb-24">
-          <h2 className="text-2xl font-bold text-center mb-12">Why StableSync</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                icon: Shield,
-                title: 'Non-custodial',
-                desc: 'Session keys let the keeper rebalance without ever holding your tokens.',
-              },
-              {
-                icon: Zap,
-                title: 'Automated',
-                desc: 'Timer + price triggers fire automatically. No manual intervention needed.',
-              },
-              {
-                icon: BarChart3,
-                title: 'Optimized ranges',
-                desc: '80% center ±0.025% + 10% wings captures maximum fees on tight stablecoin ranges.',
-              },
-              {
-                icon: RefreshCw,
-                title: 'Transparent logs',
-                desc: 'Every rebalance recorded on-chain. Full PnL history, no black boxes.',
-              },
-            ].map((f) => (
-              <div key={f.title} className="bg-surface-800 border border-surface-600 rounded-xl p-6">
-                <div className="w-10 h-10 rounded-lg bg-surface-700 flex items-center justify-center mb-4">
-                  <f.icon size={18} className="text-brand-400" />
+            {/* Logo card — glowing brand hero */}
+            <div className="md:w-1/2 relative group w-full flex justify-center">
+              {/* Outer glow layers */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/25 via-[#4edea3]/10 to-[#14B8A6]/15 rounded-3xl blur-2xl opacity-60 group-hover:opacity-90 transition-all duration-1000 scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-tl from-[#4edea3]/10 via-transparent to-[#10B981]/10 rounded-3xl blur-3xl opacity-40 group-hover:opacity-70 transition-all duration-1000" />
+
+              {/* Card */}
+              <div className="relative w-full max-w-[420px] bg-gradient-to-br from-[#0f1f18] via-[#111a14] to-[#0a1410] border border-[#2a4a35] rounded-3xl p-8 shadow-[0_0_80px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_120px_rgba(16,185,129,0.25)] transition-all duration-700">
+                {/* Inner shimmer border */}
+                <div className="absolute inset-[1px] rounded-3xl bg-gradient-to-br from-[#4edea3]/10 via-transparent to-transparent pointer-events-none" />
+
+                {/* Top row — live badge */}
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#A3A3A3] font-manrope">StableSync Protocol</span>
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                    Devnet Live
+                  </span>
                 </div>
-                <h3 className="font-semibold mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
+
+                {/* Logo */}
+                <div className="flex justify-center items-center py-6 relative">
+                  <div className="absolute w-48 h-48 bg-[#10B981]/20 rounded-full blur-3xl" />
+                  <Image
+                    src="/logo.png"
+                    alt="StableSync Logo"
+                    width={200}
+                    height={200}
+                    className="relative z-10 drop-shadow-[0_0_40px_rgba(16,185,129,0.5)] group-hover:drop-shadow-[0_0_60px_rgba(16,185,129,0.7)] transition-all duration-700 group-hover:scale-105"
+                    priority
+                  />
+                </div>
+
+                {/* Wordmark */}
+                <div className="text-center mt-4 mb-6">
+                  <div className="font-manrope text-[28px] font-black tracking-[-0.03em] text-white drop-shadow-[0_0_20px_rgba(78,222,163,0.4)]">
+                    Stable<span className="text-[#4edea3]">Sync</span>
+                  </div>
+                  <div className="text-xs text-[#A3A3A3] tracking-widest uppercase mt-1 font-manrope">
+                    Automated Stablecoin Liquidity
+                  </div>
+                </div>
+
+                {/* Bottom stats bar */}
+                <div className="grid grid-cols-3 gap-3 pt-5 border-t border-[#2a4a35]">
+                  {[
+                    { label: 'APY', value: '8–14%' },
+                    { label: 'Strategy', value: '80/10/10' },
+                    { label: 'Fee', value: '10% yield' },
+                  ].map((s) => (
+                    <div key={s.label} className="text-center">
+                      <div className="font-manrope font-bold text-[#4edea3] text-sm">{s.value}</div>
+                      <div className="text-[10px] text-[#A3A3A3] uppercase tracking-wider mt-0.5">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
-        {/* How it works */}
-        <section className="mb-24 max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-10">How it works</h2>
-          <div className="space-y-4">
-            {[
-              { step: '01', title: 'Choose your pair', desc: 'Select USDC/USDT or USDC/USDS and configure your investment amount.' },
-              { step: '02', title: 'Set your interval', desc: 'Pick how often the keeper should rebalance (min 15 min). Shorter = more yield, more SOL fees.' },
-              { step: '03', title: 'Sign once, earn always', desc: 'Delegate a session key to our keeper. It rebalances for you — you keep full custody at all times.' },
-            ].map((item) => (
-              <div key={item.step} className="flex gap-5 bg-surface-800 border border-surface-600 rounded-xl p-5">
-                <div className="text-brand-500 font-mono font-bold text-lg min-w-[2rem]">{item.step}</div>
-                <div>
-                  <div className="font-semibold mb-1">{item.title}</div>
-                  <div className="text-sm text-gray-400">{item.desc}</div>
+        {/* Stats Section — live Orca data */}
+        <OrcaLiveStats />
+
+        {/* Features Section */}
+        <section className="bg-gradient-to-b from-[#0a110d] to-[#0A0A0A] py-[80px] relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[#10B981]/5 rounded-full blur-[100px]" />
+          </div>
+          <div className="max-w-[1200px] mx-auto px-8 relative z-10">
+            <div className="text-center mb-14">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#4edea3] bg-[#4edea3]/10 border border-[#4edea3]/20 px-3 py-1.5 rounded-full mb-4">
+                Why StableSync
+              </span>
+              <h2 className="font-manrope text-[36px] leading-[1.2] font-bold text-white mb-4">
+                Institutional-Grade Automation
+              </h2>
+              <p className="text-[16px] leading-[1.6] text-[#A3A3A3] max-w-2xl mx-auto">
+                Built for the Solana ecosystem, StableSync leverages high-speed execution to maintain your positions in the most profitable ranges.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              {/* Feature 1 — large */}
+              <div className="md:col-span-2 bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-16 -mt-16" />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
+                    <Shield size={22} className="text-[#10B981]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-manrope text-[22px] font-bold text-white mb-3">Non-custodial</h3>
+                  <p className="text-[15px] leading-[1.6] text-[#A3A3A3]">
+                    Your assets stay in your control. StableSync only has permission to rebalance your liquidity within the Whirlpool parameters.
+                  </p>
                 </div>
               </div>
-            ))}
+
+              {/* Feature 2 */}
+              <div className="bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-10 -mt-10" />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
+                    <Zap size={22} className="text-[#10B981]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-manrope text-[20px] font-bold text-white mb-3">Automated</h3>
+                  <p className="text-[14px] leading-[1.6] text-[#A3A3A3]">
+                    24/7 keepers monitor price movements and rebalance instantly to prevent divergence loss.
+                  </p>
+                </div>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-10 -mt-10" />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
+                    <BarChart3 size={22} className="text-[#10B981]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-manrope text-[20px] font-bold text-white mb-3">Optimized</h3>
+                  <p className="text-[14px] leading-[1.6] text-[#A3A3A3]">
+                    Dynamic range selection based on historical volatility and real-time order book depth.
+                  </p>
+                </div>
+              </div>
+
+              {/* Feature 4 — full row */}
+              <div className="md:col-span-4 bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl flex flex-col md:flex-row items-start gap-8 transition-all group">
+                <div className="flex-1">
+                  <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
+                    <FileText size={22} className="text-[#10B981]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-manrope text-[22px] font-bold text-white mb-3">Transparent logs</h3>
+                  <p className="text-[15px] leading-[1.6] text-[#A3A3A3]">
+                    Every rebalance action is logged on-chain. Track your performance, fees, and strategy adjustments in real-time with our comprehensive explorer integration.
+                  </p>
+                </div>
+                <div className="flex-1 w-full bg-[#0d1610] rounded-xl p-5 font-mono text-xs border border-[#2a3d33]">
+                  <div className="mb-3 text-[#4a6655]">{'// Rebalance Event [Block #284,192]'}</div>
+                  <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
+                    <span className="text-[#86948a]">Action:</span>
+                    <span className="text-white">ShiftRange <span className="text-[#10B981]">✓</span></span>
+                  </div>
+                  <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
+                    <span className="text-[#86948a]">Old Tick:</span>
+                    <span className="text-[#A3A3A3]">420.69 <span className="text-[#4edea3]">→</span> <span className="text-white">421.15</span></span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#86948a]">Yield Harvested:</span>
+                    <span className="text-[#4edea3] font-semibold">+0.045 USDC</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="mb-24 text-center bg-surface-800 border border-surface-600 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold mb-4">Ready to automate your yield?</h2>
-          <p className="text-gray-400 mb-8">Connect your wallet. Set up in under 2 minutes.</p>
-          <Link
-            href="/app"
-            className="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-base"
-          >
-            Launch App <ArrowRight size={16} />
-          </Link>
+        {/* How It Works */}
+        <section className="max-w-[1200px] mx-auto px-8 py-[80px]">
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#4edea3] bg-[#4edea3]/10 border border-[#4edea3]/20 px-3 py-1.5 rounded-full mb-4">
+              How it works
+            </span>
+            <h2 className="font-manrope text-[36px] leading-[1.2] font-bold text-white">
+              Three steps to passive yield
+            </h2>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute top-6 left-[16.67%] right-[16.67%] h-px bg-gradient-to-r from-[#10B981] via-[#10B981] to-[#3c4a42] z-0" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+              {[
+                { n: '1', active: true,  title: 'Connect Wallet',  desc: 'Link your Solana wallet and select the stablecoin pair you want to provide liquidity for.' },
+                { n: '2', active: true,  title: 'Deploy Capital',  desc: 'StableSync deposits your assets into Orca Whirlpools using an optimized narrow range.' },
+                { n: '3', active: false, title: 'Earn & Compound', desc: 'Our keeper bot automatically rebalances and compounds your fees back into the pool.' },
+              ].map((step) => (
+                <div key={step.n} className="flex flex-col items-center text-center group">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-5 font-manrope transition-transform group-hover:scale-110 ${
+                    step.active
+                      ? 'bg-[#10B981] text-black shadow-[0_0_24px_rgba(16,185,129,0.5)]'
+                      : 'bg-[#171717] border-2 border-[#3c4a42] text-[#A3A3A3]'
+                  }`}>
+                    {step.n}
+                  </div>
+                  <h4 className="font-manrope text-[20px] font-bold text-white mb-2">{step.title}</h4>
+                  <p className="text-[15px] leading-[1.6] text-[#A3A3A3]">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="max-w-[1200px] mx-auto px-8 pb-[100px]">
+          <div className="relative overflow-hidden rounded-2xl border border-[#2a3d33] bg-gradient-to-br from-[#0f1f18] via-[#111714] to-[#0d1610]">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#10B981]/10 rounded-full blur-[80px]" />
+              <div className="absolute top-0 right-0 w-72 h-72 bg-[#4edea3]/5 rounded-full blur-3xl -mr-20 -mt-20" />
+            </div>
+            <div className="relative z-10 px-12 py-16 text-center">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#4edea3] bg-[#4edea3]/10 border border-[#4edea3]/20 px-3 py-1.5 rounded-full mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                Devnet Live
+              </div>
+              <h2 className="font-manrope text-[40px] font-extrabold text-white mb-4 tracking-[-0.02em]">
+                Ready to optimize your yield?
+              </h2>
+              <p className="text-[17px] leading-[1.7] text-[#A3A3A3] mb-8 max-w-xl mx-auto">
+                Join the automated revolution and let StableSync manage your concentrated liquidity positions.
+              </p>
+              <Link href="/app"
+                className="inline-block bg-[#10B981] text-black font-bold px-12 py-4 rounded-xl text-[16px] hover:bg-[#0da06f] active:scale-95 transition-all shadow-[0_0_40px_rgba(16,185,129,0.4)] font-manrope">
+                Launch App Now
+              </Link>
+            </div>
+          </div>
         </section>
       </main>
 
-      <footer className="border-t border-surface-700 py-6 text-center text-sm text-gray-500">
-        Built for Colosseum Frontier Hackathon 2026 · Solana · Orca · Pyth
+      {/* Footer */}
+      <footer className="border-t border-[#ffffff08]">
+        <div className="max-w-[1200px] mx-auto py-10 px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col gap-1.5">
+            <div className="text-[#10B981] font-bold font-manrope text-lg drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">StableSync</div>
+            <div className="text-xs uppercase tracking-widest text-neutral-600 font-manrope">
+              Colosseum Frontier Hackathon 2026
+            </div>
+          </div>
+          <div className="flex gap-8">
+            {[
+              { label: 'GitHub', href: 'https://github.com/EdCryptoFi/stablesync' },
+              { label: 'Twitter', href: 'https://x.com/Stable_Sync' },
+              { label: 'Docs', href: '/docs' },
+            ].map((l) => (
+              <a key={l.label} href={l.href}
+                target={l.href.startsWith('http') ? '_blank' : undefined}
+                rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="text-xs uppercase tracking-widest text-neutral-500 hover:text-[#10B981] transition-colors font-manrope">
+                {l.label}
+              </a>
+            ))}
+          </div>
+        </div>
       </footer>
     </div>
   );

@@ -4,25 +4,30 @@ export const DEPLOYER_PUBKEY = '7EBg9nwJspxwnr86WRhKzqXSLAybhrDUDxxPSCqctuhL';
 export const RPC_ENDPOINT =
   process.env.NEXT_PUBLIC_RPC_URL ?? 'https://api.devnet.solana.com';
 
-// Devnet test tokens (replace with mainnet addresses for production)
 export const PAIRS = [
   {
     id: 'USDC/USDT',
     tokenA: 'USDC',
     tokenB: 'USDT',
-    description: 'Most liquid stablecoin pair on Orca Devnet',
+    description: 'Most liquid stablecoin pair on Orca',
     avgApy: '8–12%',
+    // Devnet test mints (transactions)
     mintA: 'BZCSMV4ZaBMSUZnojhCnhYE5R919YN2b4U39JVEjnQzs',
     mintB: '2KrpCa2VCa9M1LVJn9Re43fyjVPCBgtUu87Z4kGdebvr',
+    // Mainnet Orca pool — used for live market data display only
+    orcaPoolAddress: '4fuUiYxTQ6QCrdSq9ouBYcTM7bqSwYTSyLueGZLTy4T4',
   },
   {
     id: 'USDC/USDS',
     tokenA: 'USDC',
     tokenB: 'USDS',
-    description: 'Emerging pair — lower liquidity, higher spread',
+    description: 'Emerging pair — Sky (MakerDAO) stablecoin',
     avgApy: '10–16%',
+    // Devnet test mints (transactions)
     mintA: 'BZCSMV4ZaBMSUZnojhCnhYE5R919YN2b4U39JVEjnQzs',
     mintB: 'HKgm8LzDNAk3skpu5yQYUjEfdSrkNX4Vsh3xPEQmD6fT',
+    // No mainnet pool address yet — Phase 2
+    orcaPoolAddress: null as string | null,
   },
 ];
 

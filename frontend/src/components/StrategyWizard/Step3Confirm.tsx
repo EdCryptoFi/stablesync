@@ -40,11 +40,11 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
   if (done) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-4 text-center">
-        <div className="w-16 h-16 rounded-full bg-brand-500/20 flex items-center justify-center">
-          <CheckCircle2 size={32} className="text-brand-500" />
+        <div className="w-16 h-16 rounded-full bg-[#10B981]/20 flex items-center justify-center">
+          <CheckCircle2 size={32} className="text-[#10B981]" />
         </div>
-        <h2 className="text-xl font-semibold">Position created!</h2>
-        <p className="text-gray-400 text-sm">The keeper will start monitoring and rebalancing your position.</p>
+        <h2 className="font-manrope text-[24px] font-bold text-white">Position created!</h2>
+        <p className="text-[#A3A3A3] text-sm">The keeper will start monitoring and rebalancing your position.</p>
       </div>
     );
   }
@@ -52,29 +52,29 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl font-semibold mb-1">Review & confirm</h2>
-        <p className="text-sm text-gray-400">Acknowledge the risks and sign to create your position.</p>
+        <h2 className="font-manrope text-[20px] font-semibold text-white mb-1">Review & confirm</h2>
+        <p className="text-sm text-[#A3A3A3]">Acknowledge the risks and sign to create your position.</p>
       </div>
 
       {/* Summary */}
-      <div className="bg-surface-800 border border-surface-600 rounded-xl divide-y divide-surface-700">
+      <div className="bg-[#0A0A0A] border border-[#3c4a42] rounded-xl divide-y divide-[#262626]">
         {[
           { label: 'Pair', value: pairInfo ? `${pairInfo.tokenA}/${pairInfo.tokenB}` : pair },
           { label: 'Deposit', value: `$${amount.toLocaleString()} USDC` },
           { label: 'Rebalance every', value: intervalInfo?.label ?? `${interval} min` },
           { label: 'Strategy', value: '80/10/10 Concentrated' },
-          { label: 'Platform fee', value: '0.2% of earned fees' },
+          { label: 'Platform fee', value: '10% of earned yield' },
         ].map((row) => (
           <div key={row.label} className="flex justify-between px-4 py-3 text-sm">
-            <span className="text-gray-400">{row.label}</span>
-            <span className="font-medium">{row.value}</span>
+            <span className="text-[#A3A3A3]">{row.label}</span>
+            <span className="font-medium text-white">{row.value}</span>
           </div>
         ))}
       </div>
 
       {/* Risk checklist */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-xs text-yellow-400 mb-3">
+        <div className="flex items-center gap-2 text-xs text-[#F59E0B] mb-3">
           <AlertTriangle size={13} />
           <span>Please read and acknowledge each item</span>
         </div>
@@ -82,7 +82,9 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
           <label
             key={i}
             className={`flex gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-              checked[i] ? 'border-brand-500/40 bg-brand-500/5' : 'border-surface-600 bg-surface-800'
+              checked[i]
+                ? 'border-[#4edea3]/40 bg-[#4edea3]/5'
+                : 'border-[#3c4a42] bg-[#0A0A0A]'
             }`}
           >
             <input
@@ -93,9 +95,9 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
                 next[i] = e.target.checked;
                 setChecked(next);
               }}
-              className="mt-0.5 accent-green-500"
+              className="mt-0.5 accent-[#10B981]"
             />
-            <span className="text-xs text-gray-300 leading-relaxed">{risk}</span>
+            <span className="text-xs text-[#A3A3A3] leading-relaxed">{risk}</span>
           </label>
         ))}
       </div>
@@ -103,10 +105,10 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
       <button
         onClick={handleConfirm}
         disabled={!allChecked || loading}
-        className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-[#10B981] hover:bg-[#0da06f] disabled:opacity-40 disabled:cursor-not-allowed text-black font-manrope font-bold py-3.5 rounded-xl transition-colors active:scale-[0.98]"
       >
         {loading ? (
-          <><Loader2 size={16} className="animate-spin" /> Creating position...</>
+          <><Loader2 size={16} className="animate-spin text-black" /> Creating position...</>
         ) : (
           'Sign & Create Position'
         )}

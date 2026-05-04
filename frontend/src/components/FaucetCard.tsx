@@ -22,6 +22,7 @@ export function FaucetCard() {
   const { publicKey } = useWallet();
   const [status, setStatus] = useState<Status>('idle');
   const [sigs, setSigs] = useState<Record<string, string>>({});
+  const [solNote, setSolNote] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [cooldownSec, setCooldownSec] = useState(0);
 
@@ -60,6 +61,7 @@ export function FaucetCard() {
         throw new Error(data.error ?? 'Unknown error');
       }
       setSigs(data.sigs ?? {});
+      setSolNote(data.solNote ?? '');
       setStatus('success');
       localStorage.setItem(STORAGE_KEY, String(Date.now()));
       // Start cooldown after next claim attempt
@@ -128,6 +130,14 @@ export function FaucetCard() {
                 </a>
               ))}
             </div>
+            {solNote && (
+              <div className="text-[10px] text-[#F59E0B] mt-1">
+                ⚠ SOL airdrop hit rate limit.{' '}
+                <a href="https://faucet.solana.com" target="_blank" rel="noreferrer" className="underline hover:text-yellow-300">
+                  Get SOL here
+                </a>
+              </div>
+            )}
           </div>
         )}
 

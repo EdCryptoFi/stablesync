@@ -63,12 +63,18 @@ export async function GET(req: NextRequest) {
 
   const connection = new Connection(DEVNET_RPC, 'confirmed');
   const sigs: Record<string, string> = {};
+  let solNote: string | undefined;
 
   try {
-    // 1. SOL airdrop
-    const solSig = await connection.requestAirdrop(userPubkey, 2 * LAMPORTS_PER_SOL);
-    await connection.confirmTransaction(solSig, 'confirmed');
-    sigs.sol = solSig;
+    // 1. SOL airdrop — best-effort, devnet public RPC has rate limits
+    try {
+      const solSig = await connection.requestAirdrop(userPubkey, 2 * LAMPORTS_PER_SOL);
+      await connection.confirmTransaction(solSig, 'confirmed');
+      sigs.sol = solSig;
+    } catch {
+      // SOL airdrop failed (rate limit) — continue with token minting
+      solNote = 'SOL airdrop unavailable (devnet rate limit). Get SOL at https://faucet.solana.com';
+    }
 
     // 2-4. Mint tokens
     for (const [symbol, mintAddress] of Object.entries(MINTS)) {
@@ -93,7 +99,7 @@ export async function GET(req: NextRequest) {
     // Record successful claim
     rateLimitMap.set(ip, now);
 
-    return NextResponse.json({ success: true, sigs });
+    return NextResponse.json({ success: true, sigs, solNote });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: `Faucet error: ${message}` }, { status: 500 });

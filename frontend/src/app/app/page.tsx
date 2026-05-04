@@ -5,6 +5,7 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { WalletButton } from '@/components/WalletButton';
 import { StrategyWizard } from '@/components/StrategyWizard';
 import { AppNavbar } from '@/components/AppNavbar';
+import { FaucetCard } from '@/components/FaucetCard';
 import Link from 'next/link';
 import { Shield, Lock } from 'lucide-react';
 
@@ -103,6 +104,7 @@ export default function AppPage() {
       <AppNavbar active="strategies" />
 
       {!connected ? <ConnectScreen /> : <StrategyWizard />}
+      {connected && <FaucetCard />}
     </div>
   );
 }

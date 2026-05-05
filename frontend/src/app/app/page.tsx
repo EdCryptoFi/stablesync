@@ -6,6 +6,7 @@ import { WalletButton } from '@/components/WalletButton';
 import { StrategyWizard } from '@/components/StrategyWizard';
 import { AppNavbar } from '@/components/AppNavbar';
 import { FaucetCard } from '@/components/FaucetCard';
+import { WalletBalanceCard } from '@/components/WalletBalanceCard';
 import Link from 'next/link';
 import { Shield, Lock } from 'lucide-react';
 
@@ -105,6 +106,7 @@ export default function AppPage() {
 
       {!connected ? <ConnectScreen /> : <StrategyWizard />}
       {connected && <FaucetCard />}
+      {connected && <WalletBalanceCard />}
     </div>
   );
 }

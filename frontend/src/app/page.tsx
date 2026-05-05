@@ -4,6 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Shield, Zap, BarChart3, FileText } from 'lucide-react';
 import { OrcaLiveStats } from '@/components/OrcaLiveStats';
+import dynamic from 'next/dynamic';
+
+const SoftAurora = dynamic(() => import('@/components/SoftAurora'), { ssr: false });
 
 export default function LandingPage() {
   return (
@@ -39,11 +42,24 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          {/* Ambient glow blobs */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-[#10B981]/8 rounded-full blur-[120px]" />
-            <div className="absolute top-[40px] left-[10%] w-[400px] h-[400px] bg-[#4edea3]/5 rounded-full blur-[100px]" />
-            <div className="absolute top-[60px] right-[5%] w-[350px] h-[350px] bg-[#14B8A6]/5 rounded-full blur-[100px]" />
+          {/* SoftAurora WebGL background */}
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.55 }}>
+            <SoftAurora
+              speed={0.4}
+              scale={1.2}
+              brightness={1.2}
+              color1="#4edea3"
+              color2="#10B981"
+              noiseFrequency={2.0}
+              noiseAmplitude={0.8}
+              bandHeight={0.55}
+              bandSpread={1.2}
+              octaveDecay={0.15}
+              layerOffset={1.5}
+              colorSpeed={0.6}
+              enableMouseInteraction={true}
+              mouseInfluence={0.15}
+            />
           </div>
 
           <div className="max-w-[1200px] mx-auto px-8 py-[100px] flex flex-col md:flex-row items-center gap-14 relative z-10">

@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { AnchorProvider, BN } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getProgram, getPositionPDA, getConfigPDA } from '@/lib/program';
 import { PAIRS, CENTER_RANGE_BPS, WING_RANGE_BPS, REBALANCE_INTERVALS, PROGRAM_ID } from '@/lib/constants';
 
@@ -15,6 +16,7 @@ export interface PositionState {
   solFeesPaid: number;
   realisedIL: number;
   isRunning: boolean;
+  nonce: number;
 }
 
 interface CreatePositionArgs {
@@ -34,7 +36,8 @@ interface StrategyContextValue {
 
 const StrategyContext = createContext<StrategyContextValue | null>(null);
 
-const STORAGE_KEY = 'stablesync_positions_v2';
+const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+const STORAGE_KEY = 'stablesync_positions_v3';
 
 function loadPositions(): PositionState[] {
   if (typeof window === 'undefined') return [];
@@ -87,32 +90,50 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
 
         const validIntervals = REBALANCE_INTERVALS.map((r) => r.value);
         if (!validIntervals.includes(args.intervalMinutes)) throw new Error('Invalid interval');
-        if (!Number.isFinite(args.amount) || args.amount < 100 || args.amount > 1000) throw new Error('Invalid amount');
+        if (!Number.isFinite(args.amount) || args.amount <= 0) throw new Error('Invalid amount');
 
         const tokenAMint = new PublicKey(pairInfo.mintA);
         const tokenBMint = new PublicKey(pairInfo.mintB);
-        const [positionPDA] = getPositionPDA(wallet.publicKey, tokenAMint, tokenBMint);
         const [configPDA] = getConfigPDA();
 
-        const accountInfo = await connection.getAccountInfo(positionPDA);
-        if (accountInfo === null) {
-          const tx = await program.methods
-            .createPosition(
-              new BN(args.intervalMinutes * 60),
-              CENTER_RANGE_BPS,
-              WING_RANGE_BPS,
-            )
-            .accounts({
-              config: configPDA,
-              position: positionPDA,
-              tokenAMint,
-              tokenBMint,
-              owner: wallet.publicKey,
-              systemProgram: SystemProgram.programId,
-            })
-            .rpc({ commitment: 'confirmed' });
-          console.log('create_position tx:', tx);
-        }
+        // Fetch current config to get the nonce (= total_positions_ever_created)
+        // The on-chain seed includes nonce so each position gets a unique PDA
+        const configAccount = await (program.account as any).strategyConfig.fetch(configPDA);
+        const nonce: number = configAccount.totalPositions.toNumber();
+
+        const [positionPDA] = getPositionPDA(wallet.publicKey, tokenAMint, tokenBMint, nonce);
+
+        // TX 1 — create_position (initializes the PositionState PDA)
+        const tx1 = await program.methods
+          .createPosition(
+            new BN(args.intervalMinutes * 60),
+            CENTER_RANGE_BPS,
+            WING_RANGE_BPS,
+          )
+          .accounts({
+            config: configPDA,
+            position: positionPDA,
+            tokenAMint,
+            tokenBMint,
+            owner: wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc({ commitment: 'confirmed' });
+        console.log('create_position tx:', tx1);
+
+        // TX 2 — init_position_vaults (creates token vault PDAs and activates the position)
+        const tx2 = await program.methods
+          .initPositionVaults()
+          .accounts({
+            position: positionPDA,
+            tokenAMint,
+            tokenBMint,
+            owner: wallet.publicKey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc({ commitment: 'confirmed' });
+        console.log('init_position_vaults tx:', tx2);
 
         const newPosition: PositionState = {
           pair: args.pair,
@@ -122,6 +143,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
           solFeesPaid: 0,
           realisedIL: 0,
           isRunning: true,
+          nonce,
         };
         setPositions((prev) => {
           const exists = prev.findIndex((p) => p.pair === args.pair);
@@ -150,15 +172,15 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
       if (!wallet.publicKey) return;
       setLoading(true);
       try {
+        const pos = positions.find((p) => p.pair === pair);
         const pairInfo = PAIRS.find((p) => p.id === pair);
-        if (pairInfo && wallet.signTransaction) {
+        if (pairInfo && wallet.signTransaction && pos) {
           try {
             const provider = new AnchorProvider(connection, wallet as any, { commitment: 'confirmed' });
             const program = getProgram(provider);
             const tokenAMint = new PublicKey(pairInfo.mintA);
             const tokenBMint = new PublicKey(pairInfo.mintB);
-            const [positionPDA] = getPositionPDA(wallet.publicKey, tokenAMint, tokenBMint);
-            const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+            const [positionPDA] = getPositionPDA(wallet.publicKey, tokenAMint, tokenBMint, pos.nonce ?? 0);
             const [vaultA] = PublicKey.findProgramAddressSync(
               [Buffer.from('vault_a'), positionPDA.toBuffer()],
               new PublicKey(PROGRAM_ID),
@@ -167,12 +189,16 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
               [Buffer.from('vault_b'), positionPDA.toBuffer()],
               new PublicKey(PROGRAM_ID),
             );
+            const userTokenA = getAssociatedTokenAddressSync(tokenAMint, wallet.publicKey);
+            const userTokenB = getAssociatedTokenAddressSync(tokenBMint, wallet.publicKey);
             await program.methods
               .closePosition()
               .accounts({
                 position: positionPDA,
                 vaultTokenA: vaultA,
                 vaultTokenB: vaultB,
+                userTokenA,
+                userTokenB,
                 owner: wallet.publicKey,
                 tokenProgram: TOKEN_PROGRAM_ID,
               })
@@ -186,7 +212,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     },
-    [connection, wallet],
+    [connection, wallet, positions],
   );
 
   const collectYield = useCallback(
@@ -194,7 +220,6 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
       const pos = positions.find((p) => p.pair === pair);
       if (!pos || pos.accumulatedYield <= 0) return 0;
 
-      // Sign a message to confirm the collect action in the wallet
       if (wallet.signMessage) {
         try {
           const msg = new TextEncoder().encode(
@@ -202,7 +227,6 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
           );
           await wallet.signMessage(msg);
         } catch (e) {
-          // User rejected — abort
           throw e;
         }
       }

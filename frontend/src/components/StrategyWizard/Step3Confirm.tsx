@@ -22,6 +22,7 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
   const [checked, setChecked] = useState<boolean[]>(RISKS.map(() => false));
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const pairInfo = PAIRS.find((p) => p.id === pair);
   const intervalInfo = REBALANCE_INTERVALS.find((i) => i.value === interval);
@@ -29,9 +30,12 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
 
   async function handleConfirm() {
     setLoading(true);
+    setError(null);
     try {
       await onConfirm();
       setDone(true);
+    } catch (e: any) {
+      setError(e?.message ?? 'Transaction failed. Check your wallet and try again.');
     } finally {
       setLoading(false);
     }
@@ -60,7 +64,7 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
       <div className="bg-[#0A0A0A] border border-[#3c4a42] rounded-xl divide-y divide-[#262626]">
         {[
           { label: 'Pair', value: pairInfo ? `${pairInfo.tokenA}/${pairInfo.tokenB}` : pair },
-          { label: 'Deposit', value: `$${amount.toLocaleString()} USDC` },
+          { label: 'Deposit (Token A)', value: `${amount.toLocaleString()} USDC` },
           { label: 'Rebalance every', value: intervalInfo?.label ?? `${interval} min` },
           { label: 'Strategy', value: '80/10/10 Concentrated' },
           { label: 'Platform fee', value: '10% of earned yield' },
@@ -101,6 +105,12 @@ export function Step3Confirm({ pair, amount, interval, onConfirm }: Props) {
           </label>
         ))}
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
+          {error}
+        </div>
+      )}
 
       <button
         onClick={handleConfirm}

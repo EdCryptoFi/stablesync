@@ -4,9 +4,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Shield, Zap, BarChart3, FileText } from 'lucide-react';
 import { OrcaLiveStats } from '@/components/OrcaLiveStats';
+import BorderGlow from '@/components/BorderGlow';
 import dynamic from 'next/dynamic';
 
 const SoftAurora = dynamic(() => import('@/components/SoftAurora'), { ssr: false });
+
+const BRAND_GLOW = {
+  glowColor: '160 70 55',
+  colors: ['#10B981', '#4edea3', '#14B8A6'] as string[],
+  backgroundColor: '#171717',
+  borderRadius: 12,
+  glowRadius: 32,
+  glowIntensity: 0.9,
+  edgeSensitivity: 25,
+};
 
 export default function LandingPage() {
   return (
@@ -171,9 +182,8 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
               {/* Feature 1 — large */}
-              <div className="md:col-span-2 bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-16 -mt-16" />
-                <div className="relative">
+              <BorderGlow className="md:col-span-2" {...BRAND_GLOW}>
+                <div className="p-7">
                   <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
                     <Shield size={22} className="text-[#10B981]" strokeWidth={1.5} />
                   </div>
@@ -182,12 +192,11 @@ export default function LandingPage() {
                     Your assets stay in your control. StableSync only has permission to rebalance your liquidity within the Whirlpool parameters.
                   </p>
                 </div>
-              </div>
+              </BorderGlow>
 
               {/* Feature 2 */}
-              <div className="bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-10 -mt-10" />
-                <div className="relative">
+              <BorderGlow {...BRAND_GLOW}>
+                <div className="p-7">
                   <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
                     <Zap size={22} className="text-[#10B981]" strokeWidth={1.5} />
                   </div>
@@ -196,12 +205,11 @@ export default function LandingPage() {
                     24/7 keepers monitor price movements and rebalance instantly to prevent divergence loss.
                   </p>
                 </div>
-              </div>
+              </BorderGlow>
 
               {/* Feature 3 */}
-              <div className="bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10B981]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity -mr-10 -mt-10" />
-                <div className="relative">
+              <BorderGlow {...BRAND_GLOW}>
+                <div className="p-7">
                   <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
                     <BarChart3 size={22} className="text-[#10B981]" strokeWidth={1.5} />
                   </div>
@@ -210,35 +218,37 @@ export default function LandingPage() {
                     Dynamic range selection based on historical volatility and real-time order book depth.
                   </p>
                 </div>
-              </div>
+              </BorderGlow>
 
               {/* Feature 4 — full row */}
-              <div className="md:col-span-4 bg-[#171717] border border-[#262626] hover:border-[#10B981]/30 p-7 rounded-xl flex flex-col md:flex-row items-start gap-8 transition-all group">
-                <div className="flex-1">
-                  <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
-                    <FileText size={22} className="text-[#10B981]" strokeWidth={1.5} />
+              <BorderGlow className="md:col-span-4" {...BRAND_GLOW}>
+                <div className="p-7 flex flex-col md:flex-row items-start gap-8">
+                  <div className="flex-1">
+                    <div className="w-12 h-12 rounded-xl bg-[#10B981]/15 flex items-center justify-center mb-5">
+                      <FileText size={22} className="text-[#10B981]" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="font-manrope text-[22px] font-bold text-white mb-3">Transparent logs</h3>
+                    <p className="text-[15px] leading-[1.6] text-[#A3A3A3]">
+                      Every rebalance action is logged on-chain. Track your performance, fees, and strategy adjustments in real-time with our comprehensive explorer integration.
+                    </p>
                   </div>
-                  <h3 className="font-manrope text-[22px] font-bold text-white mb-3">Transparent logs</h3>
-                  <p className="text-[15px] leading-[1.6] text-[#A3A3A3]">
-                    Every rebalance action is logged on-chain. Track your performance, fees, and strategy adjustments in real-time with our comprehensive explorer integration.
-                  </p>
+                  <div className="flex-1 w-full bg-[#0d1610] rounded-xl p-5 font-mono text-xs border border-[#2a3d33]">
+                    <div className="mb-3 text-[#4a6655]">{'// Rebalance Event [Block #284,192]'}</div>
+                    <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
+                      <span className="text-[#86948a]">Action:</span>
+                      <span className="text-white">ShiftRange <span className="text-[#10B981]">✓</span></span>
+                    </div>
+                    <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
+                      <span className="text-[#86948a]">Old Tick:</span>
+                      <span className="text-[#A3A3A3]">420.69 <span className="text-[#4edea3]">→</span> <span className="text-white">421.15</span></span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#86948a]">Yield Harvested:</span>
+                      <span className="text-[#4edea3] font-semibold">+0.045 USDC</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 w-full bg-[#0d1610] rounded-xl p-5 font-mono text-xs border border-[#2a3d33]">
-                  <div className="mb-3 text-[#4a6655]">{'// Rebalance Event [Block #284,192]'}</div>
-                  <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
-                    <span className="text-[#86948a]">Action:</span>
-                    <span className="text-white">ShiftRange <span className="text-[#10B981]">✓</span></span>
-                  </div>
-                  <div className="flex justify-between border-b border-[#1e2f25] pb-2 mb-2">
-                    <span className="text-[#86948a]">Old Tick:</span>
-                    <span className="text-[#A3A3A3]">420.69 <span className="text-[#4edea3]">→</span> <span className="text-white">421.15</span></span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#86948a]">Yield Harvested:</span>
-                    <span className="text-[#4edea3] font-semibold">+0.045 USDC</span>
-                  </div>
-                </div>
-              </div>
+              </BorderGlow>
             </div>
           </div>
         </section>

@@ -3,6 +3,17 @@
 import { useEffect, useState } from 'react';
 import { fetchOrcaPool, OrcaPoolData } from '@/lib/orcaApi';
 import { TrendingUp, RefreshCw, DollarSign } from 'lucide-react';
+import BorderGlow from '@/components/BorderGlow';
+
+const BRAND_GLOW = {
+  glowColor: '160 70 55',
+  colors: ['#10B981', '#4edea3', '#14B8A6'] as string[],
+  backgroundColor: '#171717',
+  borderRadius: 12,
+  glowRadius: 32,
+  glowIntensity: 0.9,
+  edgeSensitivity: 25,
+};
 
 const USDC_USDT_POOL = '4fuUiYxTQ6QCrdSq9ouBYcTM7bqSwYTSyLueGZLTy4T4';
 
@@ -62,10 +73,8 @@ export function OrcaLiveStats() {
     <section className="max-w-[1200px] mx-auto px-8 pb-[80px]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {stats.map((stat) => (
-          <div key={stat.label}
-            className="bg-[#171717] border border-[#262626] hover:border-[#3c4a42] p-6 rounded-xl transition-colors group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#10B981]/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative">
+          <BorderGlow key={stat.label} {...BRAND_GLOW}>
+            <div className="p-6">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#10B981]/15 flex items-center justify-center">
@@ -87,7 +96,7 @@ export function OrcaLiveStats() {
                 <div className="text-xs text-[#A3A3A3] mt-2 font-mono">{stat.sub}</div>
               )}
             </div>
-          </div>
+          </BorderGlow>
         ))}
       </div>
       {data && lastUpdated && (

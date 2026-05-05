@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { AnchorProvider, BN } from '@coral-xyz/anchor';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getProgram, getPositionPDA, getConfigPDA } from '@/lib/program';
 import { PAIRS, CENTER_RANGE_BPS, WING_RANGE_BPS, REBALANCE_INTERVALS, PROGRAM_ID } from '@/lib/constants';
@@ -103,8 +103,8 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
 
         const [positionPDA] = getPositionPDA(wallet.publicKey, tokenAMint, tokenBMint, nonce);
 
-        // TX 1 — create_position (initializes the PositionState PDA)
-        const tx1 = await program.methods
+        // Single transaction: create_position + init_position_vaults → one wallet approval
+        const ix1 = await program.methods
           .createPosition(
             new BN(args.intervalMinutes * 60),
             CENTER_RANGE_BPS,
@@ -118,11 +118,9 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             owner: wallet.publicKey,
             systemProgram: SystemProgram.programId,
           })
-          .rpc({ commitment: 'confirmed' });
-        console.log('create_position tx:', tx1);
+          .instruction();
 
-        // TX 2 — init_position_vaults (creates token vault PDAs and activates the position)
-        const tx2 = await program.methods
+        const ix2 = await program.methods
           .initPositionVaults()
           .accounts({
             position: positionPDA,
@@ -132,8 +130,15 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
-          .rpc({ commitment: 'confirmed' });
-        console.log('init_position_vaults tx:', tx2);
+          .instruction();
+
+        const tx = new Transaction().add(ix1, ix2);
+        const { blockhash } = await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = wallet.publicKey;
+        const sig = await wallet.sendTransaction(tx, connection, { preflightCommitment: 'confirmed' });
+        await connection.confirmTransaction(sig, 'confirmed');
+        console.log('create + init_vaults tx:', sig);
 
         const newPosition: PositionState = {
           pair: args.pair,

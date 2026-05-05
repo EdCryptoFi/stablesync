@@ -6,6 +6,9 @@ declare_id!("7D4zRu6F77ryuNbAWFh27YtWxApD8PszWFLhY1gqXMK6");
 // Fix #1: cap rebalance logs to prevent unbounded rent drain on keeper
 const MAX_REBALANCE_LOGS: u64 = 10_000;
 
+// Fix F-03: minimum deposit to prevent precision loss in liquidity allocation (80/100 integer division)
+const MIN_POSITION_DEPOSIT: u64 = 100;
+
 #[program]
 pub mod workspace {
     use super::*;
@@ -146,8 +149,11 @@ pub mod workspace {
         position.center_liquidity = 0;
         position.upper_wing_liquidity = 0;
         position.lower_wing_liquidity = 0;
+        // Fix F-01: capture current nonce (= config.total_positions before increment)
+        position.nonce = ctx.accounts.config.total_positions;
 
         let config = &mut ctx.accounts.config;
+        // Fix F-04: total_positions is cumulative (never decremented); represents positions ever created
         config.total_positions = config.total_positions
             .checked_add(1)
             .ok_or(ErrorCode::MathOverflow)?;
@@ -358,6 +364,9 @@ pub mod workspace {
 
         let position = &ctx.accounts.position;
         require!(position.is_active && position.is_initialized, ErrorCode::PositionInactive);
+
+        // Fix F-03: prevent liquidity calculation with insufficient balance (integer division loses precision)
+        require!(position.total_deposited_a >= MIN_POSITION_DEPOSIT, ErrorCode::InvalidAmount);
 
         // Fix #1: cap rebalance logs — prevents unbounded rent drain on keeper
         require!(
@@ -723,7 +732,9 @@ pub struct CreatePosition<'info> {
     pub config: Account<'info, StrategyConfig>,
     #[account(
         init,
-        seeds = [b"position", owner.key().as_ref(), token_a_mint.key().as_ref(), token_b_mint.key().as_ref()],
+        // Fix F-01: nonce (config.total_positions) in seed so PDA is unique per position creation,
+        // allowing the same pair to be reopened after close_position
+        seeds = [b"position", owner.key().as_ref(), token_a_mint.key().as_ref(), token_b_mint.key().as_ref(), &config.total_positions.to_le_bytes()],
         bump,
         payer = owner,
         space = 8 + PositionState::LEN,
@@ -741,7 +752,7 @@ pub struct CreatePosition<'info> {
 pub struct InitPositionVaults<'info> {
     #[account(
         mut,
-        seeds = [b"position", owner.key().as_ref(), token_a_mint.key().as_ref(), token_b_mint.key().as_ref()],
+        seeds = [b"position", owner.key().as_ref(), token_a_mint.key().as_ref(), token_b_mint.key().as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
         constraint = !position.is_initialized @ ErrorCode::AlreadyInitialized,
@@ -765,7 +776,10 @@ pub struct InitPositionVaults<'info> {
         token::authority = position,
     )]
     pub token_b_vault: Account<'info, TokenAccount>,
+    // Fix F-02: validate mints match what was stored in position at create time
+    #[account(constraint = token_a_mint.key() == position.token_a_mint @ ErrorCode::InvalidParameter)]
     pub token_a_mint: Account<'info, Mint>,
+    #[account(constraint = token_b_mint.key() == position.token_b_mint @ ErrorCode::InvalidParameter)]
     pub token_b_mint: Account<'info, Mint>,
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -784,7 +798,7 @@ pub struct Deposit<'info> {
     pub config: Account<'info, StrategyConfig>,
     #[account(
         mut,
-        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
         constraint = position.is_active && position.is_initialized @ ErrorCode::PositionInactive,
@@ -828,7 +842,7 @@ pub struct Withdraw<'info> {
     pub config: Account<'info, StrategyConfig>,
     #[account(
         mut,
-        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
         constraint = position.is_active && position.is_initialized @ ErrorCode::PositionInactive,
@@ -872,7 +886,7 @@ pub struct Rebalance<'info> {
     pub config: Account<'info, StrategyConfig>,
     #[account(
         mut,
-        seeds = [b"position", position.owner.as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", position.owner.as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         constraint = position.is_active && position.is_initialized @ ErrorCode::PositionInactive,
     )]
@@ -902,7 +916,7 @@ pub struct Rebalance<'info> {
 #[derive(Accounts)]
 pub struct DelegateSession<'info> {
     #[account(
-        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
     )]
@@ -943,7 +957,7 @@ pub struct RevokeSession<'info> {
 pub struct ClosePosition<'info> {
     #[account(
         mut,
-        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
         // Only require accounting balance == 0 (user must have withdrawn via withdraw ix)
@@ -991,7 +1005,7 @@ pub struct EmergencyWithdraw<'info> {
     pub config: Account<'info, StrategyConfig>,
     #[account(
         mut,
-        seeds = [b"position", position.owner.as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
+        seeds = [b"position", position.owner.as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref(), &position.nonce.to_le_bytes()],
         bump = position.bump,
     )]
     pub position: Account<'info, PositionState>,
@@ -1073,10 +1087,12 @@ pub struct PositionState {
     pub center_liquidity: u64,             // 8
     pub upper_wing_liquidity: u64,         // 8
     pub lower_wing_liquidity: u64,         // 8
+    // Fix F-01: position sequence number used in PDA seed, allowing position re-creation after close
+    pub nonce: u64,                         // 8
 }
 
 impl PositionState {
-    pub const LEN: usize = 1 + 32 + 32 + 32 + 32 + 32 + 32 + 8 + 2 + 2 + 1 + 1 + 8 + 8 + 8 + 8 + 1 + 1 + 8 + 4 + 8 + 8 + 8;
+    pub const LEN: usize = 1 + 32 + 32 + 32 + 32 + 32 + 32 + 8 + 2 + 2 + 1 + 1 + 8 + 8 + 8 + 8 + 1 + 1 + 8 + 4 + 8 + 8 + 8 + 8;
 }
 
 /// Immutable log of each rebalance event

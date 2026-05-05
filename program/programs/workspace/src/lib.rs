@@ -3,6 +3,9 @@ use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
 
 declare_id!("7D4zRu6F77ryuNbAWFh27YtWxApD8PszWFLhY1gqXMK6");
 
+// Fix #1: cap rebalance logs to prevent unbounded rent drain on keeper
+const MAX_REBALANCE_LOGS: u64 = 10_000;
+
 #[program]
 pub mod workspace {
     use super::*;
@@ -356,6 +359,12 @@ pub mod workspace {
         let position = &ctx.accounts.position;
         require!(position.is_active && position.is_initialized, ErrorCode::PositionInactive);
 
+        // Fix #1: cap rebalance logs — prevents unbounded rent drain on keeper
+        require!(
+            position.rebalance_count < MAX_REBALANCE_LOGS,
+            ErrorCode::MaxLogsExceeded
+        );
+
         let clock = Clock::get()?;
         let elapsed = clock.unix_timestamp
             .checked_sub(position.last_rebalance_ts)
@@ -489,22 +498,23 @@ pub mod workspace {
 
     // ================================================================
     // 9. REVOKE_SESSION — Owner immediately revokes keeper access
+    //    Fix #3: closes the session PDA (close = owner in context) so
+    //    rent is returned and the same keeper can be re-delegated later
     // ================================================================
     pub fn revoke_session(ctx: Context<RevokeSession>) -> Result<()> {
-        let session = &mut ctx.accounts.session;
-        session.is_revoked = true;
+        // Capture fields before account is closed by Anchor
+        let owner = ctx.accounts.session.owner;
+        let delegate = ctx.accounts.session.delegate;
+        let position = ctx.accounts.session.position;
 
-        emit!(SessionRevoked {
-            owner: session.owner,
-            delegate: session.delegate,
-            position: session.position,
-        });
+        emit!(SessionRevoked { owner, delegate, position });
         Ok(())
     }
 
     // ================================================================
     // 10. CLOSE_POSITION — Deactivates position after full withdrawal
-    //     Reclaims rent via close = owner on position PDA
+    //     Fix #2: sweeps vault dust to owner before closing, so positions
+    //     can never be permanently locked by sub-lamport token residuals
     // ================================================================
     pub fn close_position(ctx: Context<ClosePosition>) -> Result<()> {
         let owner_key = ctx.accounts.owner.key();
@@ -520,6 +530,40 @@ pub mod workspace {
             &bump_arr,
         ];
         let signer_seeds: &[&[&[u8]]] = &[seeds];
+
+        // Sweep any dust from vault_a → user before closing
+        let dust_a = ctx.accounts.vault_token_a.amount;
+        if dust_a > 0 {
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_token_a.to_account_info(),
+                        to: ctx.accounts.user_token_a.to_account_info(),
+                        authority: ctx.accounts.position.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                dust_a,
+            )?;
+        }
+
+        // Sweep any dust from vault_b → user before closing
+        let dust_b = ctx.accounts.vault_token_b.amount;
+        if dust_b > 0 {
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_token_b.to_account_info(),
+                        to: ctx.accounts.user_token_b.to_account_info(),
+                        authority: ctx.accounts.position.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                dust_b,
+            )?;
+        }
 
         token::close_account(
             CpiContext::new_with_signer(
@@ -878,7 +922,7 @@ pub struct DelegateSession<'info> {
     pub system_program: Program<'info, System>,
 }
 
-/// 2 accounts
+/// 2 accounts — Fix #3: close = owner reclaims rent + allows re-delegation to same keeper
 #[derive(Accounts)]
 pub struct RevokeSession<'info> {
     #[account(
@@ -886,12 +930,15 @@ pub struct RevokeSession<'info> {
         seeds = [b"session", owner.key().as_ref(), session.delegate.as_ref(), session.position.as_ref()],
         bump = session.bump,
         constraint = session.owner == owner.key() @ ErrorCode::Unauthorized,
+        close = owner,
     )]
     pub session: Account<'info, SessionKey>,
+    #[account(mut)]
     pub owner: Signer<'info>,
 }
 
-/// 5 accounts — Close position + reclaim rent; vault balances must be zero
+/// 7 accounts — Close position + reclaim rent; sweeps any dust to user first
+/// Fix #2: vault dust no longer blocks closure
 #[derive(Accounts)]
 pub struct ClosePosition<'info> {
     #[account(
@@ -899,6 +946,8 @@ pub struct ClosePosition<'info> {
         seeds = [b"position", owner.key().as_ref(), position.token_a_mint.as_ref(), position.token_b_mint.as_ref()],
         bump = position.bump,
         has_one = owner @ ErrorCode::Unauthorized,
+        // Only require accounting balance == 0 (user must have withdrawn via withdraw ix)
+        // Actual vault.amount may have dust that we sweep below
         constraint = position.total_deposited_a == 0 && position.total_deposited_b == 0 @ ErrorCode::PositionNotEmpty,
         close = owner,
     )]
@@ -906,15 +955,25 @@ pub struct ClosePosition<'info> {
     #[account(
         mut,
         constraint = vault_token_a.key() == position.token_a_vault @ ErrorCode::InvalidParameter,
-        constraint = vault_token_a.amount == 0 @ ErrorCode::PositionNotEmpty,
     )]
     pub vault_token_a: Account<'info, TokenAccount>,
     #[account(
         mut,
         constraint = vault_token_b.key() == position.token_b_vault @ ErrorCode::InvalidParameter,
-        constraint = vault_token_b.amount == 0 @ ErrorCode::PositionNotEmpty,
     )]
     pub vault_token_b: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        constraint = user_token_a.mint == position.token_a_mint @ ErrorCode::InvalidParameter,
+        constraint = user_token_a.owner == owner.key() @ ErrorCode::Unauthorized,
+    )]
+    pub user_token_a: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        constraint = user_token_b.mint == position.token_b_mint @ ErrorCode::InvalidParameter,
+        constraint = user_token_b.owner == owner.key() @ ErrorCode::Unauthorized,
+    )]
+    pub user_token_b: Account<'info, TokenAccount>,
     #[account(mut)]
     pub owner: Signer<'info>,
     pub token_program: Program<'info, Token>,
@@ -1201,6 +1260,8 @@ pub enum ErrorCode {
     SelfDelegation,
     #[msg("Session expiry exceeds maximum (30 days)")]
     ExpiryTooFar,
+    #[msg("Maximum rebalance logs reached for this position")]
+    MaxLogsExceeded,
 }
 
 #[event]

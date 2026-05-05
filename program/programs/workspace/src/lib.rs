@@ -794,6 +794,8 @@ pub struct Deposit<'info> {
         seeds = [b"config", config.authority.as_ref()],
         bump = config.bump,
         constraint = config.is_active && !config.is_paused @ ErrorCode::ConfigInactive,
+        // Fix F-01: ensure caller cannot pass a different config to bypass pause/fee settings
+        constraint = config.key() == position.config @ ErrorCode::Unauthorized,
     )]
     pub config: Account<'info, StrategyConfig>,
     #[account(
@@ -838,6 +840,7 @@ pub struct Withdraw<'info> {
         seeds = [b"config", config.authority.as_ref()],
         bump = config.bump,
         constraint = config.is_active && !config.is_paused @ ErrorCode::ConfigInactive,
+        constraint = config.key() == position.config @ ErrorCode::Unauthorized,
     )]
     pub config: Account<'info, StrategyConfig>,
     #[account(
@@ -882,6 +885,7 @@ pub struct Rebalance<'info> {
         seeds = [b"config", config.authority.as_ref()],
         bump = config.bump,
         constraint = config.is_active && !config.is_paused @ ErrorCode::ConfigInactive,
+        constraint = config.key() == position.config @ ErrorCode::Unauthorized,
     )]
     pub config: Account<'info, StrategyConfig>,
     #[account(
